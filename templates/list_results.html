@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+	<meta charset = "UTF-8">
+	<title> Baking Contest Results </title>
+
+</head>
+<body>
+	<table border = "1">
+		<tr>
+			<th> Entry ID </th>
+			<th> User ID </th>
+			<th> Name of Baking Item </th>
+			<th> Number of Excellent Votes </th>
+			<th> Number of Ok Votes </th>
+			<th> Number of Bad Votes </th>
+		</tr>
+		{% for result in results %}
+		<tr>
+			<td> {{result['entry_id']}} </td>
+			<td> {{result['user_id']}} </td>
+			<td> {{result['nameOfItem']}} </td>
+			<td> {{result['numExcellentVotes']}} </td>
+			<td> {{result['numOkVotes']}} </td>
+			<td> {{result['numBadVotes']}} </td>
+
+		</tr>	
+		{% endfor %}
+	</table>
+	<a href = "{{url_for('home')}}" >Back to Home</a>
+</body>
+</html>
+
