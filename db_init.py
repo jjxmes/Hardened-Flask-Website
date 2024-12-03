@@ -11,6 +11,13 @@ def init_db():
 
     cursor.executescript(sql_script)
 
+    cursor.execute('DELETE FROM new_user')
+
+    cursor.execute('''
+        INSERT INTO new_user (name, age, phoneNumber, securityLevel, password, username)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', ('Test User', 30, '1234567890', 3, 'password', 'test'))
+
     conn.commit()
     conn.close()
 

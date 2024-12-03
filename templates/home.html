@@ -1,17 +1,15 @@
 <!DOCTYPE html>
-<html lang = "en">
+<html lang="en">
 <head>
-	<meta charset = "UTF-8">
-	<title> Baking Contest Home Page </title>
+    <meta charset="UTF-8">
+    <title>Baking Contest Home Page</title>
 </head>
-
 <body>
-	<nav>
-		<u1>
-			<h3><a href = "{{url_for('add_user')}} ">Add New Banking Contest User</a></h3>
-			<h3><a href = "{{url_for('list_users')}}" >List Baking Contest Users </a></h3>
-			<h3><a href = "{{url_for('list_results')}} ">Baking Contest Entry Results </a></h3>
-		</ul>
-	</nav>
+    <h1>Welcome {{ name }}</h1>
+    <nav>
+            {% for label, endpoint in options %}
+                <h3><a href="{{ url_for(endpoint) }}">{{ label }}</a></h3>
+            {% endfor %}
+    </nav>
 </body>
 </html>

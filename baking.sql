@@ -7,8 +7,8 @@ CREATE TABLE IF NOT EXISTS new_user
 	age INTEGER,
 	phoneNumber TEXT,
 	securityLevel INTEGER,
-	password TEXT
-
+	password TEXT,
+    username TEXT UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS contest_results

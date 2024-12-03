@@ -1,11 +1,12 @@
 #main python file
 
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session, abort
 import sqlite3
 from db_init import init_db
 import os
 
 app=Flask(__name__)
+app.secret_key = 'nicolethebest'
 
 def connect_db():
     db_path = os.path.join(os.path.dirname(__file__), 'bakingContest.db')
@@ -13,10 +14,79 @@ def connect_db():
     conn.row_factory = sqlite3.Row
     return conn
 
+SECURITY_RULES = {
+    'myContestResults': 1,
+    'add_entryinfo': 1,
+    'list_users': 2,
+    'add_user': 3,
+    'list_results': 3,
+}
+
+@app.before_request
+def enforce_security():
+    # Skip checks for login page, static files, or undefined endpoints
+    if request.endpoint in ['login', 'static', None]:
+        return
+
+    # Check if the user is logged in
+    username = session.get('username')
+    securityLevel = session.get('securityLevel')
+
+    if not username or not securityLevel:
+        # If not logged in, redirect to the login page
+        return redirect(url_for('login'))
+
+    # Check if the requested route requires a higher SecurityLevel
+    required_level = SECURITY_RULES.get(request.endpoint)
+    if required_level and securityLevel < required_level:
+        # If user lacks permissions, return default "Page Not Found" error
+        abort(404)
+
 
 @app.route('/')
 def home():
-    return render_template('home.html')
+    username = session.get('username')
+    securityLevel = session.get('securityLevel')
+
+    if not username:
+        return redirect(url_for('login'))  # Redirect if not logged in
+    
+    conn = connect_db()
+    user = conn.execute('SELECT name FROM new_user WHERE username = ?', (username,)).fetchone()
+    conn.close()
+
+    if not user:
+        # If the user is not found, clear the session and redirect to login
+        session.clear()
+        return redirect(url_for('login'))
+
+    name = user['name']
+
+    options = []
+    if securityLevel == 1:
+        options = [
+            ('Show my Contest Entry Results', 'myContestResults'),
+            ('Add new Baking Contest Entry', 'add_entryinfo'),
+            ('Log out', 'logout')
+        ]
+    elif securityLevel == 2:
+        options = [
+            ('Show my Contest Entry Results', 'myContestResults'),
+            ('Add new Baking Contest Entry', 'add_entryinfo'),
+            ('List Baking Contest Users', 'list_users'),
+            ('Log out', 'logout')
+        ]
+    elif securityLevel == 3:
+        options = [
+            ('Show my Contest Entry Results', 'myContestResults'),
+            ('Add new Baking Contest User', 'add_user'),
+            ('Add new Baking Contest Entry', 'add_entryinfo'),
+            ('List Baking Contest Users', 'list_users'),
+            ('Baking Contest Entry Results', 'list_results'),
+            ('Log out', 'logout')
+        ]
+
+    return render_template('home.html', name=name, options=options)
 
 
 @app.route ('/add_user', methods = ['GET', 'POST'])
@@ -28,6 +98,7 @@ def add_user():
         phoneNumber = request.form.get ('phoneNumber', '').strip()
         securityLevel = request.form.get ('securityLevel', '').strip()
         password = request.form.get ('password', '').strip()
+        username = request.form.get('username', '').strip()
 
         #validate inputs:
         error_msg = []
@@ -50,9 +121,9 @@ def add_user():
             #Insert the new user into the database
             conn = connect_db()
             conn.execute('''
-                         INSERT INTO new_user (name, age, phoneNumber, securityLevel, password)
-                         VALUES (?,?,?,?,?)
-                         ''', (name, age, phoneNumber, securityLevel, password))
+                         INSERT INTO new_user (name, age, phoneNumber, securityLevel, password, username)
+                         VALUES (?,?,?,?,?,?)
+                         ''', (name, age, phoneNumber, securityLevel, password, username))
             conn.commit()
             conn.close()
 
@@ -85,8 +156,48 @@ def results():
     msg = request.args.get('msg', '')
     return render_template('results.html', msg = msg)
 
+#project 6 routes
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    msg = ""
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+
+        conn = connect_db()
+        cursor = conn.execute(
+            'SELECT * FROM new_user WHERE username = ? AND password = ?',
+            (username, password)
+        )
+        user = cursor.fetchone()
+        conn.close()
+
+        if user:
+            session['username'] = user['username']
+            session['securityLevel'] = user['securityLevel']
+            return redirect(url_for('home'))
+        else:
+            msg = "invalid username and/or password!"
+    
+    return render_template('login.html', msg=msg)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+@app.route('/myContestResults')
+def myContestResults():
+    return render_template('myContestResults.html')
+
+@app.route('/add_entryinfo')
+def add_entryinfo():
+    return render_template('add_entryinfo.html')
+
+
 if __name__ == '__main__':
     init_db()
     print("Database initialized successfully.")
-    app.run(port = 50003, debug = True)
+    app.run(port = 50001, debug = True)
 
