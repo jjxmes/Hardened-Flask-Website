@@ -4,6 +4,8 @@ from flask import Flask, render_template, request, redirect, url_for, session, a
 import sqlite3
 from db_init import init_db
 import os
+import Encryption
+import  string,base64
 
 app=Flask(__name__)
 app.secret_key = 'nicolethebest'
@@ -96,9 +98,12 @@ def add_user():
         name = request.form.get ('name', '').strip()
         age = request.form.get ('age', '').strip()
         phoneNumber = request.form.get ('phoneNumber', '').strip()
+        phoneNumber = str(Encryption.cipher.encrypt(bytes(phoneNumber, 'utf-8')).decode("utf-8"))
         securityLevel = request.form.get ('securityLevel', '').strip()
         password = request.form.get ('password', '').strip()
+        password = str(Encryption.cipher.encrypt(bytes(password, 'utf-8')).decode("utf-8"))
         username = request.form.get('username', '').strip()
+        username = str(Encryption.cipher.encrypt(bytes(username, 'utf-8')).decode("utf-8"))
 
         #validate inputs:
         error_msg = []
@@ -138,8 +143,22 @@ def add_user():
 def list_users():
     conn = connect_db()
     users = conn.execute('SELECT * FROM new_user').fetchall()
+    decrypted_users = []
+    for user in users:
+        decrypted_users.append(
+            {
+            'id': user['id'],
+            'name': user['name'],
+            'age': user['age'],
+            'phoneNumber': Encryption.cipher.decrypt(user['phoneNumber']),
+            'securityLevel': user['securityLevel'],
+            'password': Encryption.cipher.decrypt(user['password']),
+            'username': Encryption.cipher.decrypt(user['username']),
+            })
+    
+
     conn.close()
-    return render_template('list_users.html', users = users)
+    return render_template('list_users.html', users = decrypted_users)
 
 @app.route ('/list_results')
 def list_results():
@@ -163,7 +182,9 @@ def login():
     msg = ""
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
+        username = str(Encryption.cipher.encrypt(bytes(username, 'utf-8')).decode("utf-8"))
         password = request.form.get('password', '').strip()
+        password = str(Encryption.cipher.encrypt(bytes(password, 'utf-8')).decode("utf-8"))
 
         conn = connect_db()
         cursor = conn.execute(
@@ -238,6 +259,6 @@ def add_entryinfo():
 if __name__ == '__main__':
     init_db()
     print("Database initialized successfully.")
-    app.run(port = 50001, debug = True)
+    app.run(port = 50003, debug = True)
 
 
