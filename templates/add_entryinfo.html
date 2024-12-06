@@ -5,6 +5,25 @@
     <title>Add New Baking Contest Entry</title>
 </head>
 <body>
-    <h1>Work in Progress: Add New Baking Contest Entry</h1>
+    <h1>Bakery Contest Entry Information</h1>
+    <form method = "POST" action = "/add_entryinfo">
+
+        <label for ="nameOfItem">Name of Baking Item</label><br>
+        <input type = "text" name = "nameOfItem" id= "nameOfItem"><br>
+
+        <label for = "numExcellentVotes">Number of Excellent Votes</label><br>
+        <input type = "text" name= "numExcellentVotes" id = "numExcellentVotes"><br>
+
+        <label for = "numOkVotes">Number of OK Votes</label><br>
+        <input type = "text" name = "numOkVotes" id = "numOkVotes"><br>
+
+        <label for = "numBadVotes"> Number of Bad Votes</label><br>
+        <input type = "text" name= "numBadVotes" id = "numBadVotes"><br>
+
+        <input type="submit" value="Submit">
+
+    </form>
+    <br>
+    <a href="/">Back to Home</a>
 </body>
 </html>

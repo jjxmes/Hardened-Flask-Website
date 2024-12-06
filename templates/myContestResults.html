@@ -2,9 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Show Contest Results</title>
+    <title>My Baking Contest Results</title>
 </head>
 <body>
-    <h1>Work in Progress: Show My Contest Entry Results</h1>
+    <table border = "1">
+        <tr>
+            <td>Name of Baking Item</td>
+            <td>Number of Excellent Votes</td>
+            <td>Number of OK Votes</td>
+            <td>Number of Bad Votes</td>
+        </tr>
+        {%for result in results%}
+        <tr>
+            <td>{{result['nameOfItem']}}</td>
+            <td>{{result['numExcellentVotes']}}</td>
+            <td>{{result['numOkVotes']}}</td>
+            <td>{{result['numBadVotes']}}</td>
+        </tr>
+        {%endfor%}
+    </table>>
+    <a href = "{{url_for('home')}}">Go Back to Home</a><br>
+    <a href = "{{url_for('logout')}}">Log out</a>
 </body>
 </html>

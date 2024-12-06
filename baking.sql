@@ -21,8 +21,14 @@ CREATE TABLE IF NOT EXISTS contest_results
 	numBadVotes INTEGER,
 	FOREIGN KEY (user_id) REFERENCES new_user(id)
 );
-
+/*
 INSERT INTO contest_results (user_id, nameOfItem, numExcellentVotes, numOkVotes, numBadVotes) VALUES (1, 'Whoot Whoot Brownies', 1, 2, 4);
 INSERT INTO contest_results (user_id, nameOfItem, numExcellentVotes, numOkVotes, numBadVotes) VALUES (2, 'Cho Chip Cookies', 4, 1, 2);
 INSERT INTO contest_results (user_id, nameOfItem, numExcellentVotes, numOkVotes, numBadVotes) VALUES (3, 'Cho Cakes', 2, 4, 1);
 INSERT INTO contest_results (user_id, nameOfItem, numExcellentVotes, numOkVotes, numBadVotes) VALUES (1, 'Sugar Cookies', 2, 2, 1);
+*/
+INSERT INTO contest_results (user_id) VALUES (1);
+INSERT INTO contest_results (user_id) VALUES (2);
+INSERT INTO contest_results (user_id) VALUES (3);
+INSERT INTO contest_results (user_id) VALUES (1);
+ 

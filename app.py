@@ -189,15 +189,55 @@ def logout():
 
 @app.route('/myContestResults')
 def myContestResults():
-    return render_template('myContestResults.html')
+    conn = connect_db()
+    results = conn.execute('SELECT nameOfItem, numExcellentVotes, numOkVotes, numBadVotes FROM contest_results LIMIT 4').fetchall()
+    conn.close()
+    for row in results:
+        print(dict(row))   
+    return render_template('myContestResults.html', results = results)
 
-@app.route('/add_entryinfo')
+@app.route('/add_entryinfo', methods = ['GET','POST'])
 def add_entryinfo():
-    return render_template('add_entryinfo.html')
+    msg = ""
+    if request.method == 'POST':
+        nameOfItem = request.form.get('nameOfItem', '').strip()
+        numExcellentVotes = request.form.get('numExcellentVotes', '').strip()
+        numOkVotes = request.form.get('numOkVotes', '').strip()
+        numBadVotes = request.form.get('numBadVotes', '').strip()
+
+        #validate inputs
+        error_msg = []
+
+        if not nameOfItem:
+            error_msg.append("Query cannot return an empty name.")
+        if not numExcellentVotes.isdigit() or not (0 < int(numExcellentVotes)):
+            error_msg.append("Query cannot return an integer less than zero.")
+        if not numOkVotes.isdigit() or not (0 <int(numOkVotes)):
+            error_msg.append("Query cannot return an integer less than zero.")
+        if not numBadVotes.isdigit() or not (0 < int(numBadVotes)):
+            error_msg.append("Query cannot return an integer less than zero.")
+        
+        if error_msg:
+            error_message = "Query Result: <br>" + "<br>".join(error_msg)
+            return render_template('results.html', msg = error_message)
+        else:
+            conn = connect_db()
+            conn.execute('''
+                        INSERT INTO contest_results (nameOfItem, numExcellentVotes, numOkVotes, numBadVotes)
+                        VALUES (?,?,?,?)
+                        ''', (nameOfItem, numExcellentVotes, numOkVotes, numBadVotes))
+            conn.commit()
+            conn.close()
+
+            msg = "Query Result : Record successfully added"
+            return render_template('results.html', msg = msg)
+
+    return render_template('add_entryinfo.html', msg = msg)
 
 
 if __name__ == '__main__':
     init_db()
     print("Database initialized successfully.")
     app.run(port = 50001, debug = True)
+
 
